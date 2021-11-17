@@ -10,6 +10,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
@@ -24,16 +25,17 @@ public class dataBaseView extends javax.swing.JFrame {
 
     DefaultListModel model = new DefaultListModel();
     DefaultListModel model2 = new DefaultListModel();
+    
     public dataBaseView() throws ClassNotFoundException, SQLException {
         initComponents();
-        initializeDB();
-        lisTablesDB.setModel(model);
+        initializeDB(session.username, session.password);
+        listTablesDB.setModel(model);
         listColumnsDB.setModel(model2);
-        
     }
     
-    private void initializeDB() throws ClassNotFoundException, SQLException{
+    private void initializeDB(String username, String password) throws ClassNotFoundException, SQLException{
         Class.forName("com.mysql.jdbc.Driver");
+        // TODO: cambiar parametros
         Connection cn = DriverManager.getConnection("jdbc:mysql://localhost:3306/diu?zeroDateTimeBehavior=CONVERT_TO_NULL","root","");
         DatabaseMetaData md = cn.getMetaData();
         String[] types = {"TABLE"};
@@ -43,12 +45,12 @@ public class dataBaseView extends javax.swing.JFrame {
             String nombreTabla = rs.getString("TABLE_NAME");
             //System.out.println("Tabla: " + nombreTabla);
             model.addElement(nombreTabla);
-            ResultSet rs2 = md.getColumns(null, null, nombreTabla, null);
+            /*ResultSet rs2 = md.getColumns(null, null, nombreTabla, null);
             while (rs2.next()) {
                 String nombreCampo = rs2.getString("COLUMN_NAME");
                 //System.out.println(" Campo: " + nombreCampo);
-                model2.addElement(nombreTabla+"."+nombreCampo);
-            }
+                model2.addElement(nombreTabla + "." + nombreCampo);
+            }*/
         }
         
         cn.close();
@@ -66,7 +68,7 @@ public class dataBaseView extends javax.swing.JFrame {
         ToggleButtons = new javax.swing.ButtonGroup();
         jPanel1 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        lisTablesDB = new javax.swing.JList<>();
+        listTablesDB = new javax.swing.JList<>();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         listColumnsDB = new javax.swing.JList<>();
@@ -90,12 +92,12 @@ public class dataBaseView extends javax.swing.JFrame {
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Seleccion de Tabla"));
 
-        lisTablesDB.setModel(new javax.swing.AbstractListModel<String>() {
+        listTablesDB.setModel(new javax.swing.AbstractListModel<String>() {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
             public int getSize() { return strings.length; }
             public String getElementAt(int i) { return strings[i]; }
         });
-        jScrollPane1.setViewportView(lisTablesDB);
+        jScrollPane1.setViewportView(listTablesDB);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -186,7 +188,7 @@ public class dataBaseView extends javax.swing.JFrame {
 
         jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder("Opciones"));
 
-        UnSelect.setText("Desselecionar Selección");
+        UnSelect.setText("Deseleccionar Selección");
         UnSelect.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 UnSelectActionPerformed(evt);
@@ -266,17 +268,17 @@ public class dataBaseView extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void selectionType1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectionType1ActionPerformed
-        lisTablesDB.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        listTablesDB.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         listColumnsDB.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }//GEN-LAST:event_selectionType1ActionPerformed
 
     private void selectionType2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectionType2ActionPerformed
-        lisTablesDB.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+        listTablesDB.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
         listColumnsDB.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
     }//GEN-LAST:event_selectionType2ActionPerformed
 
     private void selectionType3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectionType3ActionPerformed
-        lisTablesDB.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        listTablesDB.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         listColumnsDB.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     }//GEN-LAST:event_selectionType3ActionPerformed
 
@@ -294,18 +296,47 @@ public class dataBaseView extends javax.swing.JFrame {
         int res = JOptionPane.showConfirmDialog(rootPane, "¿Seguro que quieres salir?", "Salir", JOptionPane.YES_NO_OPTION);
         
         if(res == JOptionPane.YES_OPTION){
+            this.dispose();
             main main = new main();
             main.setVisible(true);
-            this.dispose();
         }
     }//GEN-LAST:event_formWindowClosing
 
     private void UnSelectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UnSelectActionPerformed
-        // TODO add your handling code here:
+        listTablesDB.clearSelection();
+        model2 = new DefaultListModel();
+        listColumnsDB.setModel(model2);
     }//GEN-LAST:event_UnSelectActionPerformed
 
     private void SearchColumnsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SearchColumnsActionPerformed
-        // TODO add your handling code here:
+        model2 = new DefaultListModel();
+        listColumnsDB.setModel(model2);
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(dataBaseView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        // TODO: cambiar parametros
+        Connection cn;
+        try {
+            cn = DriverManager.getConnection("jdbc:mysql://localhost:3306/diu?zeroDateTimeBehavior=CONVERT_TO_NULL","root","");
+            DatabaseMetaData md;
+            md = cn.getMetaData();
+            String[] types = {"TABLE"};
+            ResultSet rs = md.getTables(null, null, "%", types);
+            List<String> tables = listTablesDB.getSelectedValuesList();
+            for (String table : tables) {
+                ResultSet rs2 = md.getColumns(null, null, table, null);
+                while (rs2.next()) {
+                    String nombreCampo = rs2.getString("COLUMN_NAME");
+                    //System.out.println(" Campo: " + nombreCampo);
+                    model2.addElement(table + "." + nombreCampo);
+                }
+            }
+            cn.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(dataBaseView.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_SearchColumnsActionPerformed
 
     /**
@@ -362,8 +393,8 @@ public class dataBaseView extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JList<String> lisTablesDB;
     private javax.swing.JList<String> listColumnsDB;
+    private javax.swing.JList<String> listTablesDB;
     private javax.swing.JToggleButton selectionType1;
     private javax.swing.JToggleButton selectionType2;
     private javax.swing.JToggleButton selectionType3;

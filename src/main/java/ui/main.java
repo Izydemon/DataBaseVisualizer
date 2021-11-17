@@ -122,7 +122,10 @@ public class main extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         try {
+            session.username = userName.getText();
+            session.password = userPassword.getPassword().toString();
             Class.forName("com.mysql.jdbc.Driver");
+            // TODO: cambiar parametros
             Connection cn = DriverManager.getConnection("jdbc:mysql://localhost:3306/diu?zeroDateTimeBehavior=CONVERT_TO_NULL","root","");
             dataBaseView dataBase = new dataBaseView();
             dataBase.setVisible(true);
