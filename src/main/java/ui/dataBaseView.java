@@ -5,6 +5,13 @@
  */
 package ui;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
@@ -16,9 +23,35 @@ import javax.swing.ListSelectionModel;
 public class dataBaseView extends javax.swing.JFrame {
 
     DefaultListModel model = new DefaultListModel();
-    public dataBaseView() {
+    DefaultListModel model2 = new DefaultListModel();
+    public dataBaseView() throws ClassNotFoundException, SQLException {
         initComponents();
-        listElementsDB.setModel(model);
+        initializeDB();
+        lisTablesDB.setModel(model);
+        listColumnsDB.setModel(model2);
+        
+    }
+    
+    private void initializeDB() throws ClassNotFoundException, SQLException{
+        Class.forName("com.mysql.jdbc.Driver");
+        Connection cn = DriverManager.getConnection("jdbc:mysql://localhost:3306/diu?zeroDateTimeBehavior=CONVERT_TO_NULL","root","");
+        DatabaseMetaData md = cn.getMetaData();
+        String[] types = {"TABLE"};
+        ResultSet rs = md.getTables(null, null, "%", types);
+        
+        while (rs.next()) {
+            String nombreTabla = rs.getString("TABLE_NAME");
+            //System.out.println("Tabla: " + nombreTabla);
+            model.addElement(nombreTabla);
+            ResultSet rs2 = md.getColumns(null, null, nombreTabla, null);
+            while (rs2.next()) {
+                String nombreCampo = rs2.getString("COLUMN_NAME");
+                //System.out.println(" Campo: " + nombreCampo);
+                model2.addElement(nombreTabla+"."+nombreCampo);
+            }
+        }
+        
+        cn.close();
     }
 
     /**
@@ -33,13 +66,17 @@ public class dataBaseView extends javax.swing.JFrame {
         ToggleButtons = new javax.swing.ButtonGroup();
         jPanel1 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        listElementsDB = new javax.swing.JList<>();
-        selectionType1 = new javax.swing.JToggleButton();
-        selectionType3 = new javax.swing.JToggleButton();
-        selectionType2 = new javax.swing.JToggleButton();
+        lisTablesDB = new javax.swing.JList<>();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
-        jList1 = new javax.swing.JList<>();
+        listColumnsDB = new javax.swing.JList<>();
+        jPanel3 = new javax.swing.JPanel();
+        selectionType1 = new javax.swing.JToggleButton();
+        selectionType2 = new javax.swing.JToggleButton();
+        selectionType3 = new javax.swing.JToggleButton();
+        jPanel4 = new javax.swing.JPanel();
+        UnSelect = new javax.swing.JButton();
+        SearchColumns = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         CloseWindow = new javax.swing.JMenuItem();
@@ -53,26 +90,58 @@ public class dataBaseView extends javax.swing.JFrame {
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Seleccion de Tabla"));
 
-        listElementsDB.setModel(new javax.swing.AbstractListModel<String>() {
+        lisTablesDB.setModel(new javax.swing.AbstractListModel<String>() {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
             public int getSize() { return strings.length; }
             public String getElementAt(int i) { return strings[i]; }
         });
-        jScrollPane1.setViewportView(listElementsDB);
+        jScrollPane1.setViewportView(lisTablesDB);
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING)
+        );
+
+        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Campos de las tablas"));
+
+        listColumnsDB.setModel(new javax.swing.AbstractListModel<String>() {
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            public int getSize() { return strings.length; }
+            public String getElementAt(int i) { return strings[i]; }
+        });
+        jScrollPane2.setViewportView(listColumnsDB);
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 323, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Tipo de Selección"));
 
         ToggleButtons.add(selectionType1);
         selectionType1.setText("Selección Simple");
         selectionType1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 selectionType1ActionPerformed(evt);
-            }
-        });
-
-        ToggleButtons.add(selectionType3);
-        selectionType3.setText("Selección por Múltiples Intervalos");
-        selectionType3.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                selectionType3ActionPerformed(evt);
             }
         });
 
@@ -84,62 +153,69 @@ public class dataBaseView extends javax.swing.JFrame {
             }
         });
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(selectionType1, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(selectionType2, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(selectionType3, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(selectionType1)
-                    .addComponent(selectionType2)
-                    .addComponent(selectionType3))
+        ToggleButtons.add(selectionType3);
+        selectionType3.setText("Selección por Múltiples Intervalos");
+        selectionType3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                selectionType3ActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addGap(14, 14, 14)
+                .addComponent(selectionType1, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(selectionType2, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(selectionType3, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addComponent(selectionType1)
+                .addComponent(selectionType2)
+                .addComponent(selectionType3))
         );
 
         selectionType3.setSelected(true);
 
-        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Campos de las tablas"));
+        jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder("Opciones"));
 
-        jList1.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
+        UnSelect.setText("Desselecionar Selección");
+        UnSelect.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                UnSelectActionPerformed(evt);
+            }
         });
-        jScrollPane2.setViewportView(jList1);
 
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
+        SearchColumns.setText("Buscar Columnas");
+        SearchColumns.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                SearchColumnsActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane2)
+                .addComponent(UnSelect, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(SearchColumns, javax.swing.GroupLayout.PREFERRED_SIZE, 215, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(27, Short.MAX_VALUE))
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addComponent(UnSelect)
+                .addComponent(SearchColumns))
         );
 
         jMenu1.setText("Archivo");
@@ -161,35 +237,47 @@ public class dataBaseView extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
-            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(6, 6, 6)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void selectionType1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectionType1ActionPerformed
-        listElementsDB.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        lisTablesDB.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        listColumnsDB.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }//GEN-LAST:event_selectionType1ActionPerformed
 
     private void selectionType2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectionType2ActionPerformed
-        listElementsDB.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+        lisTablesDB.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+        listColumnsDB.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
     }//GEN-LAST:event_selectionType2ActionPerformed
 
     private void selectionType3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectionType3ActionPerformed
-        listElementsDB.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        lisTablesDB.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        listColumnsDB.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     }//GEN-LAST:event_selectionType3ActionPerformed
 
     private void CloseWindowActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CloseWindowActionPerformed
@@ -212,10 +300,18 @@ public class dataBaseView extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_formWindowClosing
 
+    private void UnSelectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UnSelectActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_UnSelectActionPerformed
+
+    private void SearchColumnsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SearchColumnsActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_SearchColumnsActionPerformed
+
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
+    public static void main(String args[]) throws ClassNotFoundException, SQLException {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
@@ -238,26 +334,36 @@ public class dataBaseView extends javax.swing.JFrame {
             java.util.logging.Logger.getLogger(dataBaseView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
-
+        
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new dataBaseView().setVisible(true);
+                try {
+                    new dataBaseView().setVisible(true);
+                } catch (ClassNotFoundException ex) {
+                    Logger.getLogger(dataBaseView.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (SQLException ex) {
+                    Logger.getLogger(dataBaseView.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem CloseWindow;
+    private javax.swing.JButton SearchColumns;
     private javax.swing.ButtonGroup ToggleButtons;
-    private javax.swing.JList<String> jList1;
+    private javax.swing.JButton UnSelect;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JList<String> listElementsDB;
+    private javax.swing.JList<String> lisTablesDB;
+    private javax.swing.JList<String> listColumnsDB;
     private javax.swing.JToggleButton selectionType1;
     private javax.swing.JToggleButton selectionType2;
     private javax.swing.JToggleButton selectionType3;
