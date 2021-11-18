@@ -125,8 +125,8 @@ public class main extends javax.swing.JFrame {
             session.username = userName.getText();
             session.password = userPassword.getPassword().toString();
             Class.forName("com.mysql.jdbc.Driver");
-            // TODO: cambiar parametros
             Connection cn = DriverManager.getConnection("jdbc:mysql://localhost:3306/diu?zeroDateTimeBehavior=CONVERT_TO_NULL","root","");
+            //Connection cn = DriverManager.getConnection("jdbc:mysql://mozart.dis.ulpgc.es/DIU_BD?useSSL=true",session.username,session.password);
             dataBaseView dataBase = new dataBaseView();
             dataBase.setVisible(true);
             this.dispose();
