@@ -25,28 +25,20 @@ public class dataBaseView extends javax.swing.JFrame {
 
     DefaultListModel model = new DefaultListModel();
     DefaultListModel model2 = new DefaultListModel();
-    
+
     public dataBaseView() throws ClassNotFoundException, SQLException {
         initComponents();
         initializeDB(session.username, session.password);
         listTablesDB.setModel(model);
         listColumnsDB.setModel(model2);
     }
-    
-    private void initializeDB(String username, String password) throws ClassNotFoundException, SQLException{
-        Class.forName("com.mysql.jdbc.Driver");
-        //Connection cn = DriverManager.getConnection("jdbc:mysql://mozart.dis.ulpgc.es/DIU_BD?useSSL=true",username,password);
-        Connection cn = DriverManager.getConnection("jdbc:mysql://localhost:3306/diu?zeroDateTimeBehavior=CONVERT_TO_NULL","root","");
-        DatabaseMetaData md = cn.getMetaData();
-        String[] types = {"TABLE"};
-        ResultSet rs = md.getTables(null, null, "%", types);
-        
+
+    private void initializeDB(String username, String password) throws ClassNotFoundException, SQLException {
+        ResultSet rs = connection.readTables();
         while (rs.next()) {
             String nombreTabla = rs.getString("TABLE_NAME");
             model.addElement(nombreTabla);
         }
-        
-        cn.close();
     }
 
     /**
@@ -78,7 +70,7 @@ public class dataBaseView extends javax.swing.JFrame {
         jMenu2 = new javax.swing.JMenu();
         helpButton = new javax.swing.JMenuItem();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setResizable(false);
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
@@ -290,21 +282,31 @@ public class dataBaseView extends javax.swing.JFrame {
 
     private void CloseWindowActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CloseWindowActionPerformed
         int res = JOptionPane.showConfirmDialog(rootPane, "¿Seguro que quieres salir?", "Salir", JOptionPane.YES_NO_OPTION);
-        
-        if(res == JOptionPane.YES_OPTION){
+
+        if (res == JOptionPane.YES_OPTION) {
             this.dispose();
             main main = new main();
             main.setVisible(true);
+            try {
+                connection.closeSession();
+            } catch (SQLException ex) {
+                Logger.getLogger(dataBaseView.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }//GEN-LAST:event_CloseWindowActionPerformed
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
         int res = JOptionPane.showConfirmDialog(rootPane, "¿Seguro que quieres salir?", "Salir", JOptionPane.YES_NO_OPTION);
-        
-        if(res == JOptionPane.YES_OPTION){
+
+        if (res == JOptionPane.YES_OPTION) {
             this.dispose();
             main main = new main();
             main.setVisible(true);
+            try {
+                connection.closeSession();
+            } catch (SQLException ex) {
+                Logger.getLogger(dataBaseView.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }//GEN-LAST:event_formWindowClosing
 
@@ -317,27 +319,14 @@ public class dataBaseView extends javax.swing.JFrame {
     private void SearchColumnsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SearchColumnsActionPerformed
         model2 = new DefaultListModel();
         listColumnsDB.setModel(model2);
+
+        List<String> tables = listTablesDB.getSelectedValuesList();
+        List<String> columns;
         try {
-            Class.forName("com.mysql.jdbc.Driver");
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(dataBaseView.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        Connection cn;
-        try {
-            //cn = DriverManager.getConnection("jdbc:mysql://mozart.dis.ulpgc.es/DIU_BD?useSSL=true",session.username,session.password);
-            cn = DriverManager.getConnection("jdbc:mysql://localhost:3306/diu?zeroDateTimeBehavior=CONVERT_TO_NULL","root","");
-            DatabaseMetaData md;
-            md = cn.getMetaData();
-            List<String> tables = listTablesDB.getSelectedValuesList();
-            for (String table : tables) {
-                ResultSet rs2 = md.getColumns(null, null, table, null);
-                while (rs2.next()) {
-                    String nombreCampo = rs2.getString("COLUMN_NAME");
-                    //System.out.println(" Campo: " + nombreCampo);
-                    model2.addElement(table + "." + nombreCampo);
-                }
+            columns = connection.getColums(tables);
+            for (String column : columns) {
+                model2.addElement(column);
             }
-            cn.close();
         } catch (SQLException ex) {
             Logger.getLogger(dataBaseView.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -383,7 +372,7 @@ public class dataBaseView extends javax.swing.JFrame {
             java.util.logging.Logger.getLogger(dataBaseView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
-        
+
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {

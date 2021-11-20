@@ -121,27 +121,25 @@ public class main extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        try {
-            session.username = userName.getText();
+        session.username = userName.getText();
+        if (userPassword.getPassword().length == 0) {
+            session.password = "";
+        } else {
             session.password = userPassword.getPassword().toString();
-            Class.forName("com.mysql.jdbc.Driver");
-            Connection cn = DriverManager.getConnection("jdbc:mysql://localhost:3306/diu?zeroDateTimeBehavior=CONVERT_TO_NULL","root","");
-            //Connection cn = DriverManager.getConnection("jdbc:mysql://mozart.dis.ulpgc.es/DIU_BD?useSSL=true",session.username,session.password);
-            dataBaseView dataBase = new dataBaseView();
-            dataBase.setVisible(true);
-            this.dispose();
-        } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null, "Not Connected");
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(main.class.getName()).log(Level.SEVERE, null, ex);
         }
+        if(connection.connect(session.username, session.password)){
+            this.dispose();
+        }
+
         
+
+
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
         int res = JOptionPane.showConfirmDialog(rootPane, "¿Seguro que quieres salir?", "Salir", JOptionPane.YES_NO_OPTION);
-        
-        if(res == JOptionPane.YES_OPTION){
+
+        if (res == JOptionPane.YES_OPTION) {
             this.dispose();
         }
     }//GEN-LAST:event_formWindowClosing
