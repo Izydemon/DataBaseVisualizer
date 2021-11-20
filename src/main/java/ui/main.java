@@ -121,13 +121,14 @@ public class main extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        session.username = userName.getText();
+        String username = userName.getText();
+        String password;
         if (userPassword.getPassword().length == 0) {
-            session.password = "";
+            password = "";
         } else {
-            session.password = userPassword.getPassword().toString();
+            password = userPassword.getPassword().toString();
         }
-        if(connection.connect(session.username, session.password)){
+        if(connection.connect(username, password)){
             this.dispose();
         }
 

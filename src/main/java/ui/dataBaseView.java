@@ -28,12 +28,12 @@ public class dataBaseView extends javax.swing.JFrame {
 
     public dataBaseView() throws ClassNotFoundException, SQLException {
         initComponents();
-        initializeDB(session.username, session.password);
+        initializeDB();
         listTablesDB.setModel(model);
         listColumnsDB.setModel(model2);
     }
 
-    private void initializeDB(String username, String password) throws ClassNotFoundException, SQLException {
+    private void initializeDB() throws ClassNotFoundException, SQLException {
         ResultSet rs = connection.readTables();
         while (rs.next()) {
             String nombreTabla = rs.getString("TABLE_NAME");
