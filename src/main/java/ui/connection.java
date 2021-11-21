@@ -19,8 +19,8 @@ public class connection {
         boolean res = false;
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            cn = DriverManager.getConnection("jdbc:mysql://localhost:3306/diu?zeroDateTimeBehavior=CONVERT_TO_NULL", username, password);
-            //cn = DriverManager.getConnection("jdbc:mysql://mozart.dis.ulpgc.es/DIU_BD?useSSL=true",username,password);
+            cn = DriverManager.getConnection("jdbc:mysql://localhost:3306/?zeroDateTimeBehavior=CONVERT_TO_NULL", username, password);
+            //cn = DriverManager.getConnection("jdbc:mysql://i7-lab5.dis.ulpgc.es/DIU_BD?useSSL=true",username,password);
             dataBaseView dataBase = new dataBaseView();
             dataBase.setVisible(true);
             res = true;
